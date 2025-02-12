@@ -2,84 +2,196 @@
 {% load static %}
 
 {% block content %}
-<!-- Thanh tìm kiếm -->
-<div style="text-align: center; margin-bottom: 20px;">
-    <form method="get" action="{% url 'list_books' %}">
-        <input type="text" name="q" placeholder="Tìm kiếm sách theo tên, tác giả, nhà xuất bản..." 
-               value="{{ request.GET.q }}" style="width: 50%; padding: 8px;">
-        <button type="submit" style="padding: 8px 15px;">Tìm kiếm</button>
-    </form>
+<style>
+    /* Đảm bảo layout tổng thể */
+    .page-container {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        overflow: hidden; /* Ngăn chặn cuộn trang, chỉ cuộn trong bảng */
+    }
+
+    /* Thanh tìm kiếm & nút thêm sách cố định */
+    .search-bar-container {
+        position: sticky;
+        top: 0;
+        background-color: white;
+        z-index: 1000;
+        padding: 10px;
+        border-bottom: 2px solid #ccc;
+        text-align: center;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px; /* Khoảng cách giữa các phần tử */
+    }
+
+    .search-bar-container input {
+        width: 50%;
+        padding: 8px;
+    }
+
+    .search-bar-container button {
+        padding: 8px 15px;
+    }
+
+    .add-book-btn {
+        background-color: #28a745;
+        color: white;
+        padding: 8px 15px;
+        text-decoration: none;
+        border-radius: 5px;
+    }
+
+    /* Vùng chứa bảng sách có thể cuộn */
+    .table-container {
+        flex: 1;
+        overflow-y: auto;
+        padding-bottom: 60px; /* Tránh bị footer che khuất */
+    }
+
+    /* Bảng sách */
+    table {
+        width: 90%;
+        text-align: center;
+        border-collapse: collapse;
+        margin: auto;
+    }
+
+    thead {
+        background-color: #f2f2f2;
+    }
+
+    th, td {
+        padding: 10px;
+        border: 1px solid #ddd;
+    }
+
+    /* Nút thêm vào giỏ */
+    .add-to-cart-btn {
+        display: inline-block;
+        background-color: #28a745; /* Màu xanh lá */
+        color: white;
+        padding: 8px 12px;
+        border-radius: 5px; /* Bo tròn nút */
+        font-size: 14px;
+        font-weight: bold;
+        border: none;
+        cursor: pointer;
+        white-space: nowrap; /* Ngăn chữ bị xuống dòng */
+        transition: background 0.3s ease-in-out;
+    }
+
+    .add-to-cart-btn:hover {
+        background-color: #1e7e34; /* Màu xanh lá đậm hơn khi hover */
+    }
+
+    /* Điều chỉnh độ rộng của cột "Thêm vào giỏ" */
+    td:nth-last-child(2) { 
+        width: 140px; /* Độ rộng đủ để nút không bị ép chật */
+        text-align: center;
+    }
+
+
+    /* Nút xem chi tiết */
+    .view-detail-btn {
+        display: inline-block;
+        background-color: #007bff; /* Màu xanh dương nổi bật hơn */
+        color: white;
+        padding: 8px 12px;
+        border-radius: 5px; /* Bo tròn nút */
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: bold;
+        white-space: nowrap; /* Ngăn chữ bị xuống dòng */
+        transition: background 0.3s ease-in-out;
+    }
+
+    .view-detail-btn:hover {
+        background-color: #0056b3; /* Màu xanh đậm hơn khi hover */
+    }
+
+    /* Điều chỉnh chiều rộng của cột "Xem chi tiết" để tránh xuống dòng */
+    td:last-child {
+        width: 120px; /* Điều chỉnh độ rộng phù hợp */
+        text-align: center;
+    }
+
+    /* Footer cố định nhưng không che mất nội dung */
+    footer {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        background-color: #222;
+        color: white;
+        text-align: center;
+        padding: 5px 0;
+        font-size: 14px;
+    }
+</style>
+
+<div class="page-container">
+    <!-- Thanh tìm kiếm & Nút thêm sách -->
+    <div class="search-bar-container">
+        <form method="get" action="{% url 'list_books' %}" style="display: flex; align-items: center; gap: 10px;">
+            <input type="text" name="q" placeholder="Tìm kiếm sách theo tên, tác giả, nhà xuất bản..." 
+                   value="{{ request.GET.q }}">
+            <button type="submit">Tìm kiếm</button>
+        </form>
+        <a href="{% url 'add_book' %}" class="add-book-btn">+ Thêm sách</a>
+    </div>
+
+    <!-- Khu vực cuộn bảng sách -->
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>STT</th> 
+                    <th>Bìa</th>
+                    <th>Tên sách</th>
+                    <th>Tác giả</th>
+                    <th>Thể loại</th>
+                    <th>Nhà xuất bản</th>
+                    <th>Giá tiền</th>
+                    <th>Số lượng</th>
+                    <th>Thêm vào giỏ</th>
+                    <th>Xem chi tiết</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for book in books %}
+                <tr>
+                    <td>{{ forloop.counter }}</td> <!-- Số thứ tự tự động -->
+                    <td>
+                        {% if book.cover_image %}
+                            <img src="{{ book.cover_image.url }}" alt="{{ book.title }}" width="80">
+                        {% else %}
+                            NULL
+                        {% endif %}
+                    </td>
+                    <td>{{ book.title }}</td>
+                    <td>{{ book.author }}</td>
+                    <td>
+                        {% for category in book.categories.all %}
+                            {{ category.name }}{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </td>
+                    <td>{{ book.publisher }}</td>
+                    <td>${{ book.price }}</td>
+                    <td>
+                        <input type="number" value="1" min="1" style="width: 50px; text-align: center;">
+                    </td>
+                    <td>
+                        <button class="add-to-cart-btn">Thêm vào giỏ</button>
+                    </td>
+                    <td>
+                        <a href="{% url 'book_detail' book.id %}" class="view-detail-btn">Xem chi tiết</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 
-<!-- Bảng hiển thị sách căn giữa -->
-<div style="display: flex; justify-content: center;">
-    <table border="1" style="width: 90%; text-align: center; border-collapse: collapse;">
-        <thead>
-            <tr style="background-color: #f2f2f2;">
-                <th>Bìa</th>
-                <th>Tên sách</th>
-                <th>Tác giả</th>
-                <th>Thể loại</th>
-                <th>Nhà xuất bản</th>
-                <th>Giá tiền</th>
-                <th>Số lượng</th>
-                <th>Thêm vào giỏ</th>
-                <th>Xem chi tiết</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for book in books %}
-            <tr>
-                <!-- Ảnh sách -->
-                <td>
-                    {% if book.cover_image %}
-                        <img src="{{ book.cover_image.url }}" alt="{{ book.title }}" width="80">
-                    {% else %}
-                        NULL
-                    {% endif %}
-                </td>
-                
-                <!-- Tên sách -->
-                <td>{{ book.title }}</td>
-
-                <!-- Tác giả -->
-                <td>{{ book.author }}</td>
-
-                <!-- Thể loại -->
-                <td>
-                    {% for category in book.categories.all %}
-                        {{ category.name }}{% if not forloop.last %}, {% endif %}
-                    {% endfor %}
-                </td>
-
-                <!-- Nhà xuất bản -->
-                <td>{{ book.publisher }}</td>
-
-                <!-- Giá tiền -->
-                <td>${{ book.price }}</td>
-
-                <!-- Chọn số lượng -->
-                <td>
-                    <input type="number" value="1" min="1" style="width: 50px; text-align: center;">
-                </td>
-
-                <!-- Nút thêm vào giỏ -->
-                <td>
-                    <button style="background-color: green; color: white; padding: 5px 10px; border: none; cursor: pointer;">
-                        Thêm vào giỏ
-                    </button>
-                </td>
-
-                <!-- Nút xem chi tiết -->
-                <td>
-                    <a href="{% url 'book_detail' book.id %}" 
-                       style="text-decoration: none; background-color: blue; color: white; padding: 5px 10px;">
-                        Xem chi tiết
-                    </a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
 {% endblock %}
