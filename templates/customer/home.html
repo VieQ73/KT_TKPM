@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>Danh sách khách hàng</h2>
+    
+    <a href="{% url 'add_customer' %}" style="display: inline-block; padding: 10px; background: green; color: white; text-decoration: none; border-radius: 5px;">+ Thêm khách hàng</a>
+    
+    <table border="1" cellpadding="10" cellspacing="0" style="width: 100%; margin-top: 20px; text-align: left;">
+        <thead>
+            <tr>
+                <th>STT</th>
+                <th>Tên</th>
+                <th>Tuổi</th>
+                <th>Số điện thoại</th>
+                <th>Địa chỉ</th>
+                <th>Hành động</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for customer in customers %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ customer.name }}</td>
+                <td>{{ customer.age }}</td>
+                <td>{{ customer.phone }}</td>
+                <td>{{ customer.address }}</td>
+                <td>
+                    <a href="{% url 'edit_customer' customer.id %}" style="padding: 5px; background: blue; color: white; text-decoration: none; border-radius: 3px;">Sửa</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" style="text-align: center;">Chưa có khách hàng nào.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

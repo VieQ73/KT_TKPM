@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>{{ book.title }}</h2>
+<div class="book-detail">
+    <img src="{{ book.cover_image.url }}" alt="{{ book.title }}" width="200">
+    <p><strong>Tác giả:</strong> {{ book.author }}</p>
+    <p><strong>Thể loại:</strong> {{ book.categories.all|join:", " }}</p>
+    <p><strong>Nhà xuất bản:</strong> {{ book.publisher }}</p>
+    <p><strong>Năm xuất bản:</strong> {{ book.publication_year }}</p>
+    <p><strong>Giá:</strong> ${{ book.price }}</p>
+    <p><strong>Mô tả:</strong> {{ book.description }}</p>
+
+    <form method="post" action="{% url 'add_to_cart' book.id %}">
+        {% csrf_token %}
+        <label for="quantity">Số lượng:</label>
+        <input type="number" name="quantity" min="1" value="1">
+        <button type="submit">Thêm vào giỏ sách</button>
+    </form>
+</div>
+{% endblock %}

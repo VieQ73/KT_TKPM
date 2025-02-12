@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Thanh tìm kiếm -->
+<div style="text-align: center; margin-bottom: 20px;">
+    <form method="get" action="{% url 'list_books' %}">
+        <input type="text" name="q" placeholder="Tìm kiếm sách theo tên, tác giả, nhà xuất bản..." 
+               value="{{ request.GET.q }}" style="width: 50%; padding: 8px;">
+        <button type="submit" style="padding: 8px 15px;">Tìm kiếm</button>
+    </form>
+</div>
+
+<!-- Bảng hiển thị sách căn giữa -->
+<div style="display: flex; justify-content: center;">
+    <table border="1" style="width: 90%; text-align: center; border-collapse: collapse;">
+        <thead>
+            <tr style="background-color: #f2f2f2;">
+                <th>Bìa</th>
+                <th>Tên sách</th>
+                <th>Tác giả</th>
+                <th>Thể loại</th>
+                <th>Nhà xuất bản</th>
+                <th>Giá tiền</th>
+                <th>Số lượng</th>
+                <th>Thêm vào giỏ</th>
+                <th>Xem chi tiết</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for book in books %}
+            <tr>
+                <!-- Ảnh sách -->
+                <td>
+                    {% if book.cover_image %}
+                        <img src="{{ book.cover_image.url }}" alt="{{ book.title }}" width="80">
+                    {% else %}
+                        NULL
+                    {% endif %}
+                </td>
+                
+                <!-- Tên sách -->
+                <td>{{ book.title }}</td>
+
+                <!-- Tác giả -->
+                <td>{{ book.author }}</td>
+
+                <!-- Thể loại -->
+                <td>
+                    {% for category in book.categories.all %}
+                        {{ category.name }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </td>
+
+                <!-- Nhà xuất bản -->
+                <td>{{ book.publisher }}</td>
+
+                <!-- Giá tiền -->
+                <td>${{ book.price }}</td>
+
+                <!-- Chọn số lượng -->
+                <td>
+                    <input type="number" value="1" min="1" style="width: 50px; text-align: center;">
+                </td>
+
+                <!-- Nút thêm vào giỏ -->
+                <td>
+                    <button style="background-color: green; color: white; padding: 5px 10px; border: none; cursor: pointer;">
+                        Thêm vào giỏ
+                    </button>
+                </td>
+
+                <!-- Nút xem chi tiết -->
+                <td>
+                    <a href="{% url 'book_detail' book.id %}" 
+                       style="text-decoration: none; background-color: blue; color: white; padding: 5px 10px;">
+                        Xem chi tiết
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
