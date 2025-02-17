@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="form-container">
+    <h2>Xóa khách hàng</h2>
+    <p>Bạn có chắc chắn muốn xóa khách hàng <strong>{{ customer.name }}</strong> không?</p>
+    <form method="POST">
+        {% csrf_token %}
+        <button type="submit" style="background: #dc3545;">Xác nhận xóa</button>
+        <a href="{% url 'customer_home' %}" class="back-link" style="display: inline-block; margin-left: 10px;">
+            Hủy
+        </a>
+    </form>
+</div>
+{% endblock %}

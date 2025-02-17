@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from pathlib import Path
 import os
 
+MEDIA_URL = '/media/'
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -41,6 +43,7 @@ INSTALLED_APPS = [
     'customer',  
     'cart',
     'book',
+    'djongo',
 ]
 
 MIDDLEWARE = [
@@ -79,8 +82,14 @@ WSGI_APPLICATION = 'ldquy_project1.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'djongo',
+        'NAME': 'TKPM',  # Tên cơ sở dữ liệu của bạn
+        'CLIENT': {
+            'host': 'mongodb+srv://fanbox2003:<db_password>@tkpm.ztfhc.mongodb.net/?retryWrites=true&w=majority&appName=TKPM', 
+            'username': 'fanbox2003',  # Tên người dùng MongoDB nếu có
+            'password': 'b5DROfgvwpVkmwF8',  # Mật khẩu người dùng MongoDB nếu có
+            'authSource': 'admin',  # Nguồn xác thực (tùy thuộc vào cấu hình của bạn)
+        }
     }
 }
 

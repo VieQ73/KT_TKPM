@@ -1,38 +1,81 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h2>Danh sách khách hàng</h2>
-    
-    <a href="{% url 'add_customer' %}" style="display: inline-block; padding: 10px; background: green; color: white; text-decoration: none; border-radius: 5px;">+ Thêm khách hàng</a>
-    
-    <table border="1" cellpadding="10" cellspacing="0" style="width: 100%; margin-top: 20px; text-align: left;">
-        <thead>
-            <tr>
-                <th>STT</th>
-                <th>Tên</th>
-                <th>Tuổi</th>
-                <th>Số điện thoại</th>
-                <th>Địa chỉ</th>
-                <th>Hành động</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for customer in customers %}
-            <tr>
-                <td>{{ forloop.counter }}</td>
-                <td>{{ customer.name }}</td>
-                <td>{{ customer.age }}</td>
-                <td>{{ customer.phone }}</td>
-                <td>{{ customer.address }}</td>
-                <td>
-                    <a href="{% url 'edit_customer' customer.id %}" style="padding: 5px; background: blue; color: white; text-decoration: none; border-radius: 3px;">Sửa</a>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="6" style="text-align: center;">Chưa có khách hàng nào.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <h2 style="text-align: center; margin-bottom: 20px;">Danh sách khách hàng</h2>
+
+    <div style="text-align: center; margin-bottom: 15px;">
+        <a href="{% url 'add_customer' %}" 
+           style="display: inline-block; padding: 10px 15px; background: #28a745; 
+                  color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">
+            + Thêm khách hàng
+        </a>
+    </div>
+
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; border-radius: 10px; overflow: hidden;
+                      background-color: var(--table-bg, #ffffff); color: var(--table-text, #333); 
+                      border: 3px solid var(--table-border, #ccc);
+                      box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.3);">
+            <thead style="background: var(--table-header-bg, #007bff); color: white; border-bottom: 4px solid var(--table-border, #ccc);">
+                <tr>
+                    <th style="padding: 14px; border-right: 2px solid var(--table-border, #ccc);">STT</th>
+                    <th style="padding: 14px; border-right: 2px solid var(--table-border, #ccc);">Tên</th>
+                    <th style="padding: 14px; border-right: 2px solid var(--table-border, #ccc);">Tuổi</th>
+                    <th style="padding: 14px; border-right: 2px solid var(--table-border, #ccc);">Số điện thoại</th>
+                    <th style="padding: 14px; border-right: 2px solid var(--table-border, #ccc);">Địa chỉ</th>
+                    <th style="padding: 14px; text-align: center;">Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for customer in customers %}
+                <tr style="border-bottom: 2px solid var(--table-border, #ccc); background-color: var(--table-row-bg, #f8f9fa);">
+                    <td style="padding: 12px; text-align: center; border-right: 2px solid var(--table-border, #ccc);">{{ forloop.counter }}</td>
+                    <td style="padding: 12px; border-right: 2px solid var(--table-border, #ccc);">{{ customer.name }}</td>
+                    <td style="padding: 12px; text-align: center; border-right: 2px solid var(--table-border, #ccc);">{{ customer.age }}</td>
+                    <td style="padding: 12px; border-right: 2px solid var(--table-border, #ccc);">{{ customer.phone }}</td>
+                    <td style="padding: 12px; border-right: 2px solid var(--table-border, #ccc);">{{ customer.address }}</td>
+                    <td style="padding: 12px; text-align: center;">
+                        <a href="{% url 'edit_customer' customer.id %}" 
+                           style="padding: 8px 14px; background: #007bff; color: white; text-decoration: none; border-radius: 4px; margin-right: 5px;">
+                            Sửa
+                        </a>
+                        <a href="{% url 'delete_customer' customer.id %}" 
+                           style="padding: 8px 14px; background: #dc3545; color: white; text-decoration: none; border-radius: 4px;"
+                           onclick="return confirm('Bạn có chắc chắn muốn xóa khách hàng này?');">
+                            Xóa
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 15px; font-weight: bold; color: var(--table-text, #555);">
+                        Chưa có khách hàng nào.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <style>
+        /* Chế độ sáng */
+        :root {
+            --table-bg: #ffffff;
+            --table-text: #333;
+            --table-border: #ccc;
+            --table-header-bg: #007bff;
+            --table-row-bg: #f8f9fa;
+        }
+
+        /* Chế độ tối */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --table-bg: #2c2f33;
+                --table-text: #f1f1f1;
+                --table-border: #bbb;
+                --table-header-bg: #4a90e2;
+                --table-row-bg: #3b3e42;
+            }
+        }
+    </style>
 {% endblock %}

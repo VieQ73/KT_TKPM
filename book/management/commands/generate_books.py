@@ -4,13 +4,13 @@ from faker import Faker
 import random
 
 class Command(BaseCommand):
-    help = "Xóa tất cả sách cũ và tạo mới 30 cuốn sách giả lập"
+    help = "Xóa tất cả sách cũ và tạo mới 20 cuốn sách giả lập"
 
     def handle(self, *args, **kwargs):
         fake = Faker()
 
         # Xóa toàn bộ sách và thể loại cũ
-        print("🗑️ XXa tất cả  thể loại cũ...")
+        print("🗑️ Xoá tất cả  thể loại cũ...")
         Book.objects.all().delete()
         Category.objects.all().delete()
         self.stdout.write(self.style.WARNING("🔄 Đã xóa toàn bộ sách và thể loại cũ."))
@@ -35,13 +35,11 @@ class Command(BaseCommand):
                 publisher=fake.company(),
                 publication_year=random.randint(1990, 2024),
             )
+            book.save()  # Lưu sách vào cơ sở dữ liệu trước khi gán thể loại
             books.append(book)
 
-        # Lưu tất cả sách cùng lúc (tăng tốc hiệu suất)
-        created_books = Book.objects.bulk_create(books)
-
-        # Gán thể loại cho từng sách sau khi tạo xong
-        for book in created_books:
+        # Gán thể loại cho từng sách sau khi đã lưu vào cơ sở dữ liệu
+        for book in books:
             book.categories.set(random.sample(categories, random.randint(1, 3)))
 
-        self.stdout.write(self.style.SUCCESS("✅ Đã tạo 30 cuốn sách mới thành công!"))
+        self.stdout.write(self.style.SUCCESS("✅ Đã tạo 20 cuốn sách mới thành công!"))

@@ -3,195 +3,534 @@
 
 {% block content %}
 <style>
-    /* Đảm bảo layout tổng thể */
-    .page-container {
-        display: flex;
-        flex-direction: column;
-        height: 100vh;
-        overflow: hidden; /* Ngăn chặn cuộn trang, chỉ cuộn trong bảng */
+    /* Định dạng nền trang */
+    body {
+        background-color: #363636; /* Nền xám trung tính */
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
     }
 
-    /* Thanh tìm kiếm & nút thêm sách cố định */
-    .search-bar-container {
-        position: sticky;
-        top: 0;
-        background-color: white;
-        z-index: 1000;
-        padding: 10px;
-        border-bottom: 2px solid #ccc;
-        text-align: center;
-        display: flex;
+    /* Container chứa danh sách sách */
+    .books-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); /* Tự động điều chỉnh số cột */
+        gap: 20px;
+        padding: 30px;
         justify-content: center;
+    }
+
+    /* Book Card với gradient xanh navy - xám bạc */
+    .book-card {
+        background: linear-gradient(135deg, #2c3e50, #bdc3c7); /* Gradient từ xanh navy sang xám bạc */
+        border-radius: 12px;
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2); /* Đổ bóng tối hơn */
+        overflow: hidden;
+        text-align: center;
+        transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        padding: 15px;
+        border: 1px solid rgba(255, 255, 255, 0.2); /* Viền sáng nhẹ */
+    }
+
+    /* Hiệu ứng khi di chuột vào sách */
+    .book-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(44, 62, 80, 0.3); /* Đổ bóng xanh đậm */
+    }
+
+    /* Tiêu đề sách */
+    .book-title {
+        background: #34495e; /* Xanh đậm */
+        color: white; /* Chữ trắng */
+        padding: 12px;
+        font-weight: bold;
+        font-size: 18px;
+        border-bottom: 3px solid #5d6d7e; /* Viền dưới xanh bạc */
+        border-radius: 8px 8px 0 0; /* Bo góc trên */
+    }
+
+    /* Hiệu ứng hover cho tiêu đề */
+    .book-title:hover {
+        background: #2c3e50; /* Tối hơn khi di chuột */
+    }
+
+    /* Nội dung chính */
+    .book-content {
+        padding: 20px;
+    }
+
+    /* Container bọc ảnh sách */
+    .book-cover-container {
+        display: flex;
         align-items: center;
-        gap: 10px; /* Khoảng cách giữa các phần tử */
+        justify-content: center;
+        height: 180px;
+        background-color: #f8f8f8;
+        border-radius: 5px;
+        margin-bottom: 10px;
     }
 
-    .search-bar-container input {
-        width: 50%;
-        padding: 8px;
-    }
-
-    .search-bar-container button {
-        padding: 8px 15px;
-    }
-
-    .add-book-btn {
-        background-color: #28a745;
-        color: white;
-        padding: 8px 15px;
-        text-decoration: none;
+    /* Ảnh sách */
+    .book-cover {
+        width: 100px;
+        height: 150px;
+        object-fit: cover;
         border-radius: 5px;
     }
 
-    /* Vùng chứa bảng sách có thể cuộn */
-    .table-container {
-        flex: 1;
-        overflow-y: auto;
-        padding-bottom: 60px; /* Tránh bị footer che khuất */
+    /* Khi không có ảnh */
+    .no-image {
+        width: 100px;
+        height: 150px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        color: #888;
+        background-color: #ddd;
+        border-radius: 5px;
     }
 
-    /* Bảng sách */
-    table {
-        width: 90%;
-        text-align: center;
-        border-collapse: collapse;
-        margin: auto;
+    /* Thông tin sách */
+    .book-info {
+        margin-top: 10px;
+        font-size: 14px;
+        color: #000000;
+        font-weight: 500;
     }
 
-    thead {
-        background-color: #f2f2f2;
+    /* Chứa các nút bấm */
+    .buttons {
+        margin-top: 15px;
+        display: flex;
+        justify-content: center;
+        gap: 10px;
     }
 
-    th, td {
-        padding: 10px;
-        border: 1px solid #ddd;
-    }
-
-    /* Nút thêm vào giỏ */
-    .add-to-cart-btn {
+    /* Nút bấm */
+    .add-to-cart-btn, .view-detail-btn {
         display: inline-block;
-        background-color: #28a745; /* Màu xanh lá */
-        color: white;
         padding: 8px 12px;
-        border-radius: 5px; /* Bo tròn nút */
+        border-radius: 6px;
         font-size: 14px;
         font-weight: bold;
-        border: none;
         cursor: pointer;
-        white-space: nowrap; /* Ngăn chữ bị xuống dòng */
-        transition: background 0.3s ease-in-out;
+        text-decoration: none;
+        color: white;
+        transition: 0.3s;
+        border: none;
+    }
+
+    /* Nút thêm vào giỏ hàng */
+    .add-to-cart-btn {
+        background: #1abc9c; /* Xanh ngọc */
     }
 
     .add-to-cart-btn:hover {
-        background-color: #1e7e34; /* Màu xanh lá đậm hơn khi hover */
+        background: #16a085;
     }
-
-    /* Điều chỉnh độ rộng của cột "Thêm vào giỏ" */
-    td:nth-last-child(2) { 
-        width: 140px; /* Độ rộng đủ để nút không bị ép chật */
-        text-align: center;
-    }
-
 
     /* Nút xem chi tiết */
     .view-detail-btn {
-        display: inline-block;
-        background-color: #007bff; /* Màu xanh dương nổi bật hơn */
-        color: white;
-        padding: 8px 12px;
-        border-radius: 5px; /* Bo tròn nút */
-        text-decoration: none;
-        font-size: 14px;
-        font-weight: bold;
-        white-space: nowrap; /* Ngăn chữ bị xuống dòng */
-        transition: background 0.3s ease-in-out;
+        background: #2980b9; /* Xanh dương đậm */
     }
 
     .view-detail-btn:hover {
-        background-color: #0056b3; /* Màu xanh đậm hơn khi hover */
+        background: #1f618d;
     }
 
-    /* Điều chỉnh chiều rộng của cột "Xem chi tiết" để tránh xuống dòng */
-    td:last-child {
-        width: 120px; /* Điều chỉnh độ rộng phù hợp */
-        text-align: center;
+    /* Container chứa thanh tìm kiếm và nút thêm sách */
+    .search-and-add-container {
+    display: flex;
+    justify-content: center; 
+    align-items: center;
+    gap: 15px; 
+    margin: 1 0; 
+    padding: 10px;
+    max-width: 800px;
+    margin-left: auto; 
+    margin-right: auto;
+    }
+    /* Form tìm kiếm */
+    .search-form {
+        display: flex;
+        align-items: center;
+        gap: 10px; /* Khoảng cách giữa ô tìm kiếm và nút */
+        flex: 1; /* Chiếm phần lớn không gian */
     }
 
-    /* Footer cố định nhưng không che mất nội dung */
-    footer {
-        position: fixed;
-        bottom: 0;
-        width: 100%;
-        background-color: #222;
-        color: white;
-        text-align: center;
-        padding: 5px 0;
+    /* Ô tìm kiếm */
+    .search-input {
+        padding: 10px 15px;
+        border: 2px solid #2980b9; /* Viền xanh dương */
+        border-radius: 8px;
         font-size: 14px;
+        width: 100%; /* Chiếm toàn bộ chiều rộng */
+        transition: border-color 0.3s ease;
+    }
+
+    .search-input:focus {
+        border-color: #1abc9c; /* Đổi màu viền khi focus */
+        outline: none;
+    }
+
+    /* Nút tìm kiếm */
+    .search-button {
+        padding: 10px 20px;
+        background-color: #2980b9; /* Xanh dương */
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        min-width: 120px; /* Đảm bảo kích thước nút */
+    }
+
+    .search-button:hover {
+        background-color: #1f618d; /* Xanh dương đậm khi hover */
+    }
+
+    /* Nút thêm sách */
+    .add-book-button {
+        padding: 10px 20px;
+        background-color: #1abc9c; /* Xanh ngọc */
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        text-decoration: none;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        min-width: 120px; /* Đảm bảo kích thước nút */
+    }
+
+    .add-book-button:hover {
+        background-color: #16a085; /* Xanh ngọc đậm khi hover */
+    }
+
+    /* Đảm bảo chữ trong ô tìm kiếm không bị xuống dòng */
+    .search-input::placeholder {
+        white-space: nowrap; /* Không xuống dòng */
+    }
+
+    /* Container chứa nút "Sửa", giúp căn giữa */
+    .edit-button-container {
+        display: flex;
+        justify-content: center; /* Căn giữa nút "Sửa" */
+        margin-top: 10px; /* Khoảng cách giữa các nút */
+    }
+
+    /* Căn chỉnh nút "Sửa" */
+    .edit-book-btn {
+        background: #f39c12; /* Màu cam */
+        padding: 8px 16px; /* Điều chỉnh padding để tránh chữ bị xuống dòng */
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: bold;
+        text-decoration: none;
+        color: white;
+        transition: 0.3s;
+        border: none;
+        text-align: center;
+        width: fit-content; /* Đảm bảo không bị co lại */
+        min-width: 120px; /* Giữ kích thước ổn định */
+    }
+
+    /* Hiệu ứng hover */
+    .edit-book-btn:hover {
+        background: #e67e22;
+    }
+    /* Định dạng chung cho modal */
+    .modal {
+        display: none; /* Ẩn mặc định */
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5); /* Nền mờ */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Nội dung modal */
+    .modal-content {
+        background: white;
+        padding: 25px;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 450px;
+        box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.3);
+        text-align: center;
+        position: relative;
+        animation: fadeIn 0.3s ease-in-out;
+    }
+
+    /* Tiêu đề modal */
+    .modal-header {
+        font-size: 22px;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 15px;
+    }
+
+    /* Nút đóng modal */
+    .close {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        font-size: 24px;
+        font-weight: bold;
+        color: #888;
+        cursor: pointer;
+        transition: 0.2s;
+        background: none;
+        border: none;
+    }
+
+    .close:hover {
+        color: #333;
+    }
+
+    /* Form input */
+    .modal-content input,
+    .modal-content select {
+        width: 100%;
+        padding: 10px;
+        margin: 8px 0;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+    }
+
+    /* Nút "Xác nhận" */
+    .modal-button {
+        background-color: #ff5722;
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        font-size: 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: 0.3s;
+        width: 100%;
+        margin-top: 10px;
+    }
+
+    .modal-button:hover {
+        background-color: #e64a19;
+    }
+
+    /* Nút "Hủy" */
+    .cancel-button {
+        background-color: #ddd;
+        color: black;
+        border: none;
+        padding: 12px 20px;
+        font-size: 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: 0.3s;
+        width: 100%;
+        margin-top: 10px;
+    }
+
+    .cancel-button:hover {
+        background-color: #bbb;
+    }
+
+    /* Hiệu ứng mở modal */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: scale(0.9);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+
+    /* Thông báo */
+    .notification {
+        display: none;
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background-color: #4CAF50;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 5px;
+        box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);
+        opacity: 0;
+        transition: opacity 0.5s ease-in-out;
+    }
+
+    .notification.show {
+        display: block;
+        opacity: 1;
+    }
+
+    /* Đáp ứng màn hình nhỏ */
+    @media (max-width: 768px) {
+        .books-container {
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); /* Giảm kích thước khi màn hình nhỏ */
+        }
+
+        .book-title {
+            font-size: 16px;
+            padding: 10px;
+        }
+
+        .book-info {
+            font-size: 12px;
+        }
+
+        /* Điều chỉnh kích thước ô tìm kiếm và nút */
+        .search-button, .add-book-button {
+            min-width: 100px; /* Kích thước nhỏ hơn trên màn hình nhỏ */
+        }
     }
 </style>
 
-<div class="page-container">
-    <!-- Thanh tìm kiếm & Nút thêm sách -->
-    <div class="search-bar-container">
-        <form method="get" action="{% url 'list_books' %}" style="display: flex; align-items: center; gap: 10px;">
-            <input type="text" name="q" placeholder="Tìm kiếm sách theo tên, tác giả, nhà xuất bản..." 
-                   value="{{ request.GET.q }}">
-            <button type="submit">Tìm kiếm</button>
-        </form>
-        <a href="{% url 'add_book' %}" class="add-book-btn">+ Thêm sách</a>
-    </div>
+<!-- Thanh Tìm Kiếm và Nút Thêm Sách -->
+<div class="search-and-add-container">
+    <form method="GET" action="{% url 'list_books' %}" class="search-form">
+        <input type="text" name="q" placeholder="Tìm kiếm sách..." value="{{ request.GET.q }}" class="search-input">
+        <button type="submit" class="search-button">Tìm kiếm</button>
+    </form>
+    <a href="{% url 'add_book' %}" class="add-book-button">Thêm sách</a>
+</div>
 
-    <!-- Khu vực cuộn bảng sách -->
-    <div class="table-container">
-        <table>
-            <thead>
-                <tr>
-                    <th>STT</th> 
-                    <th>Bìa</th>
-                    <th>Tên sách</th>
-                    <th>Tác giả</th>
-                    <th>Thể loại</th>
-                    <th>Nhà xuất bản</th>
-                    <th>Giá tiền</th>
-                    <th>Số lượng</th>
-                    <th>Thêm vào giỏ</th>
-                    <th>Xem chi tiết</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for book in books %}
-                <tr>
-                    <td>{{ forloop.counter }}</td> <!-- Số thứ tự tự động -->
-                    <td>
-                        {% if book.cover_image %}
-                            <img src="{{ book.cover_image.url }}" alt="{{ book.title }}" width="80">
-                        {% else %}
-                            NULL
-                        {% endif %}
-                    </td>
-                    <td>{{ book.title }}</td>
-                    <td>{{ book.author }}</td>
-                    <td>
-                        {% for category in book.categories.all %}
-                            {{ category.name }}{% if not forloop.last %}, {% endif %}
-                        {% endfor %}
-                    </td>
-                    <td>{{ book.publisher }}</td>
-                    <td>${{ book.price }}</td>
-                    <td>
-                        <input type="number" value="1" min="1" style="width: 50px; text-align: center;">
-                    </td>
-                    <td>
-                        <button class="add-to-cart-btn">Thêm vào giỏ</button>
-                    </td>
-                    <td>
-                        <a href="{% url 'book_detail' book.id %}" class="view-detail-btn">Xem chi tiết</a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+<!-- Danh sách sách -->
+<div class="books-container">
+    {% for book in books %}
+        <div class="book-card">
+            <div class="book-title">{{ book.title }}</div>
+            <div class="book-content">
+                <div class="book-cover-container">
+                    {% if book.cover_image %}
+                        <img src="{{ book.cover_image.url }}" alt="{{ book.title }}" class="book-cover">
+                    {% else %}
+                        <div class="no-image">No Image</div>
+                    {% endif %}
+                </div>
+                <div class="book-info">Tác giả: {{ book.author }}</div>
+                <div class="book-info">Thể loại: 
+                    {% for category in book.categories.all %}
+                        {{ category.name }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </div>
+                <div class="book-info">Nhà xuất bản: {{ book.publisher }}</div>
+                <div class="book-info">Giá: ${{ book.price }}</div>
+                <div class="buttons">
+                    <button class="add-to-cart-btn" data-book-id="{{ book.id }}">Thêm vào giỏ</button>
+                    <a href="{% url 'book_detail' book.id %}" class="view-detail-btn">Xem chi tiết</a>
+                </div>
+                <div class="edit-button-container">
+                    <a href="{% url 'edit_book' book.id %}" class="edit-book-btn">Sửa</a>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+<!-- Modal -->
+<div id="customerModal" class="modal">
+    <div class="modal-content">
+        <button class="close" onclick="closeModal()">&times;</button>
+        <h2>Thêm vào giỏ</h2>
+        <form id="add-to-cart-form" method="POST">
+            {% csrf_token %}
+            <div>
+                <label for="quantity">Số lượng:</label>
+                <input type="number" id="quantity" name="quantity" min="1" value="1" required>
+            </div>
+            <div>
+                <label for="customer_id">Chọn người dùng:</label>
+                <select id="customer_id" name="customer_id" required>
+                    {% for customer in customers %}
+                        <option value="{{ customer.id }}">{{ customer.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <input type="hidden" id="book_id" name="book_id">
+            <button type="submit" class="modal-button">Xác nhận</button>
+            <button type="button" class="cancel-button" onclick="closeModal()">Hủy</button>
+        </form>
     </div>
 </div>
+
+
+<!-- Thông báo thành công -->
+<div id="notification" class="notification">Sách đã được thêm vào giỏ hàng!</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var modal = document.getElementById("customerModal");
+        var bookIdInput = document.getElementById("book_id");
+        var notification = document.getElementById("notification");
+
+        // Đảm bảo modal bị ẩn khi tải trang
+        modal.style.display = "none";
+
+        // Lấy danh sách tất cả các nút "Thêm vào giỏ"
+        var addToCartButtons = document.querySelectorAll(".add-to-cart-btn");
+
+        addToCartButtons.forEach(function(button) {
+            button.addEventListener("click", function() {
+                var bookId = this.getAttribute("data-book-id");
+                bookIdInput.value = bookId;
+                modal.style.display = "flex";
+            });
+        });
+
+        // Đóng modal
+        window.closeModal = function() {
+            modal.style.display = "none";
+        };
+
+        // Đóng modal khi nhấn ra ngoài
+        window.onclick = function(event) {
+            if (event.target === modal) {
+                closeModal();
+            }
+        };
+
+        // Xử lý khi bấm "Xác nhận"
+        document.getElementById("add-to-cart-form").addEventListener("submit", function(event) {
+            event.preventDefault(); // Ngăn chặn load lại trang
+
+            var formData = new FormData(this); // Lấy dữ liệu từ form
+
+            fetch("{% url 'add_to_cart' %}", {  // Đổi thành URL xử lý thêm vào giỏ hàng
+                method: "POST",
+                body: formData,
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}"  // Đảm bảo gửi CSRF token
+                }
+            })
+            .then(response => response.json()) // Chuyển phản hồi thành JSON
+            .then(data => {
+                if (data.success) {
+                    closeModal();
+                    notification.textContent = "Thêm vào giỏ thành công!";
+                    notification.classList.add("show");
+
+                    setTimeout(function() {
+                        notification.classList.remove("show");
+                    }, 3000);
+                } else {
+                    alert("Lỗi: " + data.message);
+                }
+            })
+            .catch(error => console.error("Lỗi khi thêm vào giỏ:", error));
+        });
+    });
+
+</script>
 
 {% endblock %}

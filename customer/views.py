@@ -26,3 +26,10 @@ def edit_customer(request, customer_id):
     else:
         form = CustomerForm(instance=customer)
     return render(request, 'customer/edit_customer.html', {'form': form})
+
+def delete_customer(request, customer_id):
+    customer = get_object_or_404(Customer, id=customer_id)
+    if request.method == "POST":
+        customer.delete()
+        return redirect('customer_home')
+    return render(request, 'customer/delete_customer.html', {'customer': customer})

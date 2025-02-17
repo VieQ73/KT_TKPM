@@ -1,21 +1,137 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h2>{{ book.title }}</h2>
-<div class="book-detail">
-    <img src="{{ book.cover_image.url }}" alt="{{ book.title }}" width="200">
-    <p><strong>Tác giả:</strong> {{ book.author }}</p>
-    <p><strong>Thể loại:</strong> {{ book.categories.all|join:", " }}</p>
-    <p><strong>Nhà xuất bản:</strong> {{ book.publisher }}</p>
-    <p><strong>Năm xuất bản:</strong> {{ book.publication_year }}</p>
-    <p><strong>Giá:</strong> ${{ book.price }}</p>
-    <p><strong>Mô tả:</strong> {{ book.description }}</p>
+<style>
+    .book-detail-container {
+        display: flex;
+        width: 100%;
+        max-width: 1300px;
+        margin: 20px auto;
+        background: linear-gradient(135deg, #797979, #bdc3c7);
+        border-radius: 12px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+        height: 470px;
+        position: relative;
+        gap: 15px;
+        padding: 15px;
+    }
 
-    <form method="post" action="{% url 'add_to_cart' book.id %}">
-        {% csrf_token %}
-        <label for="quantity">Số lượng:</label>
-        <input type="number" name="quantity" min="1" value="1">
-        <button type="submit">Thêm vào giỏ sách</button>
-    </form>
+    .book-left {
+        width: 22%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        padding: 15px;
+        text-align: center;
+        height: 95%;
+        background: rgba(0, 169, 254, 0.1);
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        overflow-y: auto; /* Thêm cuộn nếu nội dung quá dài */
+    }
+
+
+    .book-left:hover, .book-right:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(44, 62, 80, 0.4);
+    }
+
+    .book-left img {
+        width: 100%;
+        max-height: 60%; /* Giảm chiều cao ảnh để không che mất phần thông tin */
+        object-fit: contain;
+        border-radius: 5px;
+        margin-bottom: 10px;
+    }
+
+    .no-image {
+        width: 100px;
+        height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        color: #888;
+        background-color: #ddd;
+        border-radius: 5px;
+        margin-bottom: 10px;
+    }
+
+    .book-info {
+        color: white;
+        font-weight: 500;
+        font-size: 14px;
+        line-height: 1.4; /* Tăng khoảng cách giữa các dòng */
+        margin-bottom: 5px; /* Thêm khoảng cách giữa các dòng thông tin */
+    }
+
+    .book-right {
+        width: 80%;
+        padding: 15px;
+        height: 95%;
+        overflow-y: auto;
+        background: #f8f8f8;
+        border-left: 3px solid rgba(255, 255, 255, 0.3);
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .book-right p {
+        color: #333;
+        line-height: 1.5;
+    }
+
+    .back-button-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+    }
+
+    .back-button {
+        display: inline-block;
+        padding: 10px 15px;
+        background: #2980b9;
+        color: white;
+        text-decoration: none;
+        border-radius: 6px;
+        transition: 0.3s;
+        font-weight: bold;
+    }
+
+    .back-button:hover {
+        background: #1f618d;
+    }
+</style>
+
+<div class="book-detail-container">
+    <div class="book-left">
+        {% if book.cover_image %}
+            <img src="{{ book.cover_image.url }}" alt="{{ book.title }}">
+        {% else %}
+            <div class="no-image">No Image</div>
+        {% endif %}
+        <p class="book-info"><strong>{{ book.title }}</strong></p>
+        <p class="book-info">Tác giả: {{ book.author }}</p>
+        <p class="book-info">Thể loại: {{ book.categories.all|join:", " }}</p>
+        <p class="book-info">Nhà xuất bản: {{ book.publisher }}</p>
+        <p class="book-info">Năm xuất bản: {{ book.publication_year }}</p>
+        <p class="book-info">Giá: ${{ book.price }}</p>
+    </div>
+    <div class="book-right">
+        <div>
+            <p><strong>Mô tả</strong></p>
+            <p>{{ book.description }}</p>
+        </div>
+    </div>
+</div>
+<div class="back-button-container">
+    <a href="{% url 'list_books' %}" class="back-button">Quay lại danh sách sách</a>
 </div>
 {% endblock %}

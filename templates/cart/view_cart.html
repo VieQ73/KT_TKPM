@@ -1,6 +1,166 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h2>Your Cart</h2>
-<p>Here are the items in your cart.</p>
+<style>
+    /* Định dạng nền trang */
+    body {
+        background-color: #242424; /* Nền xám trung tính */
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+    }
+    /* Container chứa danh sách giỏ hàng */
+    .cart-container {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr); /* Hiển thị tối đa 4 thẻ trong một hàng */
+        gap: 20px; /* Khoảng cách giữa các thẻ giỏ hàng */
+        padding: 20px;
+        justify-items: center; /* Căn giữa các thẻ giỏ hàng */
+        height: 100vh; /* Đảm bảo container chiếm toàn bộ chiều cao màn hình */
+        overflow-y: auto; /* Cho phép cuộn nếu có quá nhiều thẻ giỏ hàng */
+    }
+
+    /* Thẻ giỏ hàng */
+    .cart-card {
+        background: linear-gradient(135deg, #2c3e50, #bdc3c7); /* Gradient từ xanh navy sang xám bạc */
+        border-radius: 12px;
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2); /* Đổ bóng */
+        overflow: hidden;
+        transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        padding: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.2); /* Viền sáng nhẹ */
+        width: 350x; /* Cố định chiều rộng cho mỗi thẻ */
+        height: 510px; /* Cố định chiều cao cho mỗi thẻ */
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .cart-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(44, 62, 80, 0.3); /* Đổ bóng khi hover */
+    }
+
+    /* Tiêu đề giỏ hàng */
+    .cart-header {
+        background: #34495e; /* Xanh đậm */
+        color: white;
+        padding: 12px;
+        font-weight: bold;
+        font-size: 18px;
+        border-radius: 8px 8px 0 0; /* Bo góc trên */
+        text-align: center;
+    }
+
+    /* Phần thông tin sách trong giỏ hàng */
+    .cart-items {
+        flex: 1;
+        overflow-y: auto; /* Cho phép cuộn nếu có quá nhiều sách */
+        max-height: 450px; /* Giới hạn chiều cao cho phần sách */
+    }
+
+    /* Bảng thông tin sách */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 15px;
+    }
+
+    th, td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #ddd; /* Viền dưới mỗi hàng */
+    }
+
+    th {
+        background-color: #34495e; /* Màu nền tiêu đề */
+        color: white;
+        position: sticky;
+        top: 0; /* Để tiêu đề cố định khi cuộn */
+        z-index: 1; /* Đảm bảo tiêu đề nằm trên các phần khác */
+    }
+
+    td {
+        word-wrap: break-word; /* Cho phép tên sách xuống dòng khi cần thiết */
+    }
+
+    /* Thêm cột số thứ tự */
+    .index-column {
+        text-align: center;
+    }
+
+    /* Phần tổng tiền và nút thanh toán */
+    .cart-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px;
+        background-color: #f2f2f2; /* Màu nền nhẹ */
+        border-radius: 8px;
+    }
+
+    .total-price {
+        font-size: 16px;
+        font-weight: bold;
+        color: #2c3e50; /* Màu chữ xanh đậm */
+    }
+
+    /* Nút thanh toán */
+    .checkout-btn {
+        padding: 8px 16px;
+        background-color: #1abc9c; /* Xanh ngọc */
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    .checkout-btn:hover {
+        background-color: #16a085; /* Xanh ngọc đậm khi hover */
+    }
+</style>
+
+<!-- Danh sách giỏ hàng -->
+<div class="cart-container">
+    {% for cart_total in cart_totals %}
+        <div class="cart-card">
+            <!-- Tiêu đề giỏ hàng -->
+            <div class="cart-header">
+                <h3>Khách hàng: {{ cart_total.cart.customer.name }}</h3>
+            </div>
+
+            <!-- Phần thông tin sách -->
+            <div class="cart-items">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Sách</th>
+                            <th>Số lượng</th>
+                            <th>Giá</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in cart_total.cart.items.all %}
+                            <tr>
+                                <td class="index-column">{{ forloop.counter }}</td>
+                                <td>{{ item.book.title }}</td>
+                                <td>{{ item.quantity }}</td>
+                                <td>${{ item.book.price }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Phần tổng tiền và nút thanh toán -->
+            <div class="cart-footer">
+                <p class="total-price">Tổng tiền: ${{ cart_total.total_price }}</p>
+                <button class="checkout-btn">Thanh toán</button>
+            </div>
+        </div>
+    {% endfor %}
+</div>
 {% endblock %}
